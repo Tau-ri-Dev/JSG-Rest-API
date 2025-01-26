@@ -7,6 +7,8 @@ import dev.tauri.jsgrest.sites.Network;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class RestAPI {
@@ -16,6 +18,31 @@ public class RestAPI {
             new Network()
     };
 
+    public static Map<String, String> queryToMap(String query) {
+        if (query == null) {
+            return null;
+        }
+        Map<String, String> result = new HashMap<>();
+        for (String param : query.split("&")) {
+            try {
+                String[] entry = param.split("=");
+                if (entry.length > 1) {
+                    result.put(
+                            entry[0],
+                            entry[1]
+                    );
+                } else {
+                    result.put(
+                            entry[0],
+                            ""
+                    );
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        return result;
+    }
+
     public static void start() {
         if (server != null) server.stop(0);
         try {
@@ -24,13 +51,10 @@ public class RestAPI {
             server = HttpServer.create(new InetSocketAddress(port), 0);
             for (var site : sitesArray) {
                 server.createContext(site.getPath(), exchange -> {
+                    var query = queryToMap(exchange.getRequestURI().getQuery());
                     try {
                         if (!Objects.equals(authToken, "")) {
-                            if (!exchange.getRequestHeaders().containsKey("auth")) {
-                                exchange.sendResponseHeaders(403, 0);
-                                return;
-                            }
-                            var tokenGot = exchange.getRequestHeaders().getFirst("auth");
+                            var tokenGot = query.get("authToken");
                             if (tokenGot == null) {
                                 exchange.sendResponseHeaders(403, 0);
                                 return;

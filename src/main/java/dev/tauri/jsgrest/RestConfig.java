@@ -1,5 +1,6 @@
 package dev.tauri.jsgrest;
 
+import dev.tauri.jsgrest.util.StringUtils;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
@@ -57,6 +58,6 @@ public class RestConfig {
                 .comment(
                         "Auth token",
                         "Leave blank for no authentication"
-                ).define("Token", "");
+                ).define("RestID", StringUtils.getRandomString(16));
     }
 }
